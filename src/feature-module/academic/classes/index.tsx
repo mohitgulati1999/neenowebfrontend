@@ -129,6 +129,7 @@ const Classes = () => {
       const res = await axios.get(`${API_URL}/api/session/get`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
+      console.log("Sessions: ",res.data);
       setSessions(res.data);
     } catch (error) {
       console.log("Error fetching sessions:", error);
@@ -141,6 +142,7 @@ const Classes = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setTeachers(res.data);
+      console.log("TEACHERS: ",res.data)
     } catch (error) {
       console.log("Error fetching teachers:", error);
     }
@@ -154,6 +156,7 @@ const Classes = () => {
 
   useEffect(() => {
     if (selectedClass) {
+      console.log("Selected Class:", selectedClass);
       setFormData({
         id: selectedClass.id || "",
         name: selectedClass.name || "",
@@ -172,7 +175,7 @@ const Classes = () => {
       });
 
       // Map the sessionId and teacherId to their full objects
-      const session = sessions.find((s) => s._id === res.data.sessionId);
+      const session = sessions.find((s) => s._id === res.data._id);
       const selectedTeachers = teachers.filter((t) => res.data.teacherId.includes(t._id));
 
       // Construct the new class with the same structure as fetched data
@@ -418,7 +421,7 @@ const Classes = () => {
                         <Select
                           isMulti
                           options={teachers.map((teacher) => ({
-                            value: teacher._id,
+                            value: teacher.userId._id,
                             label: teacher.name,
                           }))}
                           value={getSelectedTeacherOptions()}
@@ -519,7 +522,7 @@ const Classes = () => {
                         <Select
                           isMulti
                           options={teachers.map((teacher) => ({
-                            value: teacher._id,
+                            value: teacher.userId._id,
                             label: teacher.name,
                           }))}
                           value={getSelectedTeacherOptions()}
