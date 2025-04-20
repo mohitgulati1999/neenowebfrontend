@@ -20,7 +20,7 @@ import { TimePicker } from "antd";
 import axios from "axios";
 import toast from "react-hot-toast";
 import * as bootstrap from "bootstrap";
-
+const API_URL = process.env.REACT_APP_URL;
 interface EventDetails {
   _id?: string;
   eventFor: string;
@@ -65,7 +65,7 @@ const Events = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/events/get",{
+      const response = await axios.get(`${API_URL}/api/events/get`,{
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -187,7 +187,7 @@ const Events = () => {
 
       if (isEditMode && editEventId) {
         // Update event (PUT request)
-        await axios.put(`http://localhost:5000/api/events/update/${editEventId}`, payload,{
+        await axios.put(`${API_URL}/api/events/update/${editEventId}`, payload,{
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -195,7 +195,7 @@ const Events = () => {
         toast.success("Event updated successfully!");
       } else {
         // Add new event (POST request)
-        await axios.post("http://localhost:5000/api/events/add", payload, {
+        await axios.post(`${API_URL}/api/events/add`, payload, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -242,7 +242,7 @@ const Events = () => {
   const handleDeleteEvent = async () => {
     if (eventDetails && eventDetails._id) {
       try {
-        await axios.delete(`http://localhost:5000/api/events/delete/${eventDetails._id}`, {
+        await axios.delete(`${API_URL}/api/events/delete/${eventDetails._id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

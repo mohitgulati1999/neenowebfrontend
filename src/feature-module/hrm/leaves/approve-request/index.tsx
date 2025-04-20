@@ -80,7 +80,7 @@ const CustomDateRangePicker: React.FC<CustomDateRangePickerProps> = ({ onChange 
 
 const ApproveRequest: React.FC = () => {
   const routes = all_routes;
-  const apiBaseUrl = "http://localhost:5000/api";
+  const apiBaseUrl = process.env.REACT_APP_URL;
   const [leaves, setLeaves] = useState<TableData[]>([]);
   const [filteredLeaves, setFilteredLeaves] = useState<TableData[]>([]);
   const [responseData, setResponseData] = useState<Leave[]>([]); // Store raw API response
@@ -133,7 +133,7 @@ const ApproveRequest: React.FC = () => {
         }
 
         if (decoded?.role === "admin") {
-          const classResponse = await axios.get<Class[]>(`${apiBaseUrl}/class`, {
+          const classResponse = await axios.get<Class[]>(`${apiBaseUrl}/api/class`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setClasses(classResponse.data);
@@ -161,12 +161,12 @@ const ApproveRequest: React.FC = () => {
         let endpoint = "";
         let params = {};
         if (currentUser?.role === "admin") {
-          endpoint = `${apiBaseUrl}/leaves`;
+          endpoint = `${apiBaseUrl}/api/leaves`;
           if (selectedClass) {
             params = { classId: selectedClass };
           }
         } else if (currentUser?.role === "teacher") {
-          endpoint = `${apiBaseUrl}/leaves/teacher`;
+          endpoint = `${apiBaseUrl}/api/leaves/teacher`;
         } else {
           console.error("Invalid role:", currentUser?.role);
           toast.error("Unauthorized access.");
@@ -262,7 +262,7 @@ const ApproveRequest: React.FC = () => {
   const handleStatusUpdate = async (leaveId: string, status: "approved" | "rejected") => {
     try {
       const response = await axios.put(
-        `${apiBaseUrl}/leaves/update`,
+        `${apiBaseUrl}/api/leaves/update`,
         { leaveId, status },
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );

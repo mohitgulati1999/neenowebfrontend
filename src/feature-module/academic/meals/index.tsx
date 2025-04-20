@@ -3,10 +3,11 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { all_routes } from "../../router/all_routes";
+const API_URL = process.env.REACT_APP_URL;
 
 // Interfaces
 interface Meal {
-  _id?: string; // Added for edit/delete
+  _id?: string;
   name: string;
   description: string;
   picture: string | null;
@@ -26,7 +27,7 @@ interface User {
 }
 
 interface MealFormData {
-  _id?: string; // For edit
+  _id?: string;
   day: string;
   mealType: string;
   name: string;
@@ -49,7 +50,7 @@ const CustomTooltip: React.FC = () => {
 
 const MealPlan: React.FC = () => {
   const routes = all_routes;
-  const apiBaseUrl = "http://localhost:5000/api";
+  const apiBaseUrl = process.env.REACT_APP_URL;
   const [mealPlan, setMealPlan] = useState<MealPlan>({
     Monday: { breakfast: null, lunch: null },
     Tuesday: { breakfast: null, lunch: null },
@@ -106,7 +107,7 @@ const MealPlan: React.FC = () => {
           return;
         }
 
-        const response = await axios.get<MealPlan>(`${apiBaseUrl}/meals/plan`, {
+        const response = await axios.get<MealPlan>(`${apiBaseUrl}/api/meals/plan`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -121,6 +122,24 @@ const MealPlan: React.FC = () => {
     };
     fetchInitialData();
   }, []);
+
+  // Focus first input when Add Meal modal opens
+  useEffect(() => {
+    const modalElement = document.getElementById("add_meal");
+    if (modalElement) {
+      modalElement.addEventListener("shown.bs.modal", () => {
+        const firstInput = modalElement.querySelector("input[name='name']") as HTMLInputElement;
+        if (firstInput) {
+          firstInput.focus();
+        }
+      });
+    }
+  }, []);
+
+  // Log mealPlan state to debug missing _id
+  useEffect(() => {
+    console.log("Current mealPlan state:", mealPlan);
+  }, [mealPlan]);
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -148,7 +167,7 @@ const MealPlan: React.FC = () => {
       }
 
       const response = await axios.post(
-        `${apiBaseUrl}/meals/add`,
+        `${apiBaseUrl}/api/meals/add`,
         newMeal,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -161,13 +180,32 @@ const MealPlan: React.FC = () => {
             _id: response.data.meal._id,
             name: newMeal.name,
             description: newMeal.description,
-            picture: null
+            picture: response.data.meal.picture || null
           }
         }
       }));
 
       setNewMeal({ day: "", mealType: "", name: "", description: "" });
       toast.success("Meal added successfully.");
+
+      // Manually close the modal
+      const modalElement = document.getElementById("add_meal");
+      if (modalElement) {
+        if (window.bootstrap && window.bootstrap.Modal) {
+          const modal = window.bootstrap.Modal.getInstance(modalElement);
+          modal?.hide();
+        } else {
+          console.warn("Bootstrap Modal not available, using fallback to close modal");
+          const closeButton = modalElement.querySelector(".btn-close") as HTMLButtonElement;
+          if (closeButton) {
+            closeButton.click();
+          } else {
+            console.error("Close button not found in add_meal modal");
+          }
+        }
+      } else {
+        console.error("add_meal modal element not found");
+      }
     } catch (error: any) {
       console.error("Error adding meal:", error);
       toast.error(`Failed to add meal: ${error.response?.data?.message || "Please try again."}`);
@@ -177,7 +215,10 @@ const MealPlan: React.FC = () => {
   // Handle edit meal
   const handleEditMeal = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editMeal) return;
+    if (!editMeal || !editMeal._id) {
+      toast.error("Invalid meal ID. Please try again.");
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token");
@@ -192,7 +233,7 @@ const MealPlan: React.FC = () => {
       }
 
       const response = await axios.put(
-        `${apiBaseUrl}/meals/${editMeal._id}`,
+        `${apiBaseUrl}/api/meals/${editMeal._id}`,
         {
           day: editMeal.day,
           mealType: editMeal.mealType,
@@ -210,13 +251,32 @@ const MealPlan: React.FC = () => {
             _id: editMeal._id,
             name: editMeal.name,
             description: editMeal.description,
-            picture: null
+            picture: response.data.meal.picture || null
           }
         }
       }));
 
       setEditMeal(null);
       toast.success("Meal updated successfully.");
+
+      // Manually close the modal
+      const modalElement = document.getElementById("edit_meal");
+      if (modalElement) {
+        if (window.bootstrap && window.bootstrap.Modal) {
+          const modal = window.bootstrap.Modal.getInstance(modalElement);
+          modal?.hide();
+        } else {
+          console.warn("Bootstrap Modal not available, using fallback to close modal");
+          const closeButton = modalElement.querySelector(".btn-close") as HTMLButtonElement;
+          if (closeButton) {
+            closeButton.click();
+          } else {
+            console.error("Close button not found in edit_meal modal");
+          }
+        }
+      } else {
+        console.error("edit_meal modal element not found");
+      }
     } catch (error: any) {
       console.error("Error editing meal:", error);
       toast.error(`Failed to edit meal: ${error.response?.data?.message || "Please try again."}`);
@@ -234,7 +294,7 @@ const MealPlan: React.FC = () => {
         return;
       }
 
-      await axios.delete(`${apiBaseUrl}/meals/${deleteMealId}`, {
+      await axios.delete(`${apiBaseUrl}/api/meals/${deleteMealId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -375,15 +435,20 @@ const MealPlan: React.FC = () => {
                                               className="btn btn-sm btn-outline-primary me-2"
                                               data-bs-toggle="modal"
                                               data-bs-target="#edit_meal"
-                                              onClick={() =>
+                                              onClick={() => {
+                                                if (!meal._id) {
+                                                  console.error(`No _id found for meal: ${meal.name}`);
+                                                  toast.error("Cannot edit meal: Missing ID.");
+                                                  return;
+                                                }
                                                 setEditMeal({
                                                   _id: meal._id,
                                                   day,
                                                   mealType,
                                                   name: meal.name,
                                                   description: meal.description
-                                                })
-                                              }
+                                                });
+                                              }}
                                             >
                                               <i className="ti ti-edit me-1" />
                                               Edit
@@ -392,7 +457,14 @@ const MealPlan: React.FC = () => {
                                               className="btn btn-sm btn-outline-danger"
                                               data-bs-toggle="modal"
                                               data-bs-target="#delete_meal"
-                                              onClick={() => setDeleteMealId(meal._id || "")}
+                                              onClick={() => {
+                                                if (!meal._id) {
+                                                  console.error(`No _id found for meal: ${meal.name}`);
+                                                  toast.error("Cannot delete meal: Missing ID.");
+                                                  return;
+                                                }
+                                                setDeleteMealId(meal._id);
+                                              }}
                                             >
                                               <i className="ti ti-trash me-1" />
                                               Delete
@@ -429,6 +501,7 @@ const MealPlan: React.FC = () => {
                 className="btn-close custom-btn-close"
                 data-bs-dismiss="modal"
                 aria-label="Close"
+                onClick={() => setNewMeal({ day: "", mealType: "", name: "", description: "" })}
               >
                 <i className="ti ti-x" />
               </button>
@@ -443,7 +516,7 @@ const MealPlan: React.FC = () => {
                     value={newMeal.day}
                     onChange={handleInputChange}
                   >
-                    <option value="">Select Day</option>
+                    <option value="">Select day's meal</option>
                     {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day) => (
                       <option key={day} value={day}>
                         {day}
@@ -492,10 +565,11 @@ const MealPlan: React.FC = () => {
                   to="#"
                   className="btn btn-light me-2"
                   data-bs-dismiss="modal"
+                  onClick={() => setNewMeal({ day: "", mealType: "", name: "", description: "" })}
                 >
                   Cancel
                 </Link>
-                <button type="submit" className="btn btn-primary" data-bs-dismiss="modal">
+                <button type="submit" className="btn btn-primary">
                   Submit
                 </button>
               </div>
@@ -514,6 +588,7 @@ const MealPlan: React.FC = () => {
                 className="btn-close custom-btn-close"
                 data-bs-dismiss="modal"
                 aria-label="Close"
+                onClick={() => setEditMeal(null)}
               >
                 <i className="ti ti-x" />
               </button>
@@ -581,7 +656,7 @@ const MealPlan: React.FC = () => {
                 >
                   Cancel
                 </Link>
-                <button type="submit" className="btn btn-primary" data-bs-dismiss="modal">
+                <button type="submit" className="btn btn-primary">
                   Save Changes
                 </button>
               </div>

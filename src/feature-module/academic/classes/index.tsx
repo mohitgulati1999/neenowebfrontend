@@ -9,7 +9,7 @@ import { all_routes } from "../../router/all_routes";
 import axios from "axios";
 import Select from "react-select";
 import toast, { Toaster } from "react-hot-toast";
-
+const API_URL = process.env.REACT_APP_URL;
 const Classes = () => {
   const dropdownMenuRef = useRef<HTMLDivElement | null>(null);
   const route = all_routes;
@@ -110,7 +110,7 @@ const Classes = () => {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/class", {
+      const res = await axios.get(`${API_URL}/api/class`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const formattedData = res.data.map((item: any) => ({
@@ -126,7 +126,7 @@ const Classes = () => {
 
   const fetchSessions = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/session/get", {
+      const res = await axios.get(`${API_URL}/api/session/get`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setSessions(res.data);
@@ -137,7 +137,7 @@ const Classes = () => {
 
   const fetchTeachers = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/teacher", {
+      const res = await axios.get(`${API_URL}/api/teacher`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setTeachers(res.data);
@@ -167,7 +167,7 @@ const Classes = () => {
     e.preventDefault();
     try {
       const payload = { ...formData, teacherId: formData.teacherId };
-      const res = await axios.post("http://localhost:5000/api/class", payload, {
+      const res = await axios.post(`${API_URL}/api/class`, payload, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
@@ -198,7 +198,7 @@ const Classes = () => {
       try {
         const payload = { ...formData, teacherId: formData.teacherId };
         const res = await axios.put(
-          `http://localhost:5000/api/class/${selectedClass.key}`,
+          `${API_URL}/api/class/${selectedClass.key}`,
           payload,
           {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -231,7 +231,7 @@ const Classes = () => {
     e.preventDefault();
     if (selectedClass) {
       try {
-        await axios.delete(`http://localhost:5000/api/class/${selectedClass.key}`, {
+        await axios.delete(`${API_URL}/api/class/${selectedClass.key}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setFetclass((prev) => prev.filter((item) => item.key !== selectedClass.key));

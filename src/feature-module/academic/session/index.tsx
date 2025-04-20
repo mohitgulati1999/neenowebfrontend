@@ -10,6 +10,7 @@ import Table from "../../../core/common/dataTable/index";
 import { TableData } from "../../../core/data/interface";
 import { Modal } from "bootstrap"; // Import Modal directly
 import toast, { Toaster } from "react-hot-toast"; // Import react-hot-toast
+const API_URL = process.env.REACT_APP_URL;
 
 interface Session {
   _id: string;
@@ -37,7 +38,7 @@ const SessionUI = () => {
   // Fetch sessions from the API
   const fetchSessions = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/session/get", {
+      const res = await axios.get(`${API_URL}/api/session/get`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setSessions(res.data);
@@ -71,7 +72,7 @@ const SessionUI = () => {
     };
     console.log(sessionData);
     try {
-      const response = await axios.post("http://localhost:5000/api/session/create", sessionData,{
+      const response = await axios.post(`${API_URL}/api/session/create`, sessionData,{
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -125,7 +126,7 @@ const SessionUI = () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/session/update/${editSession._id}`,
+        `${API_URL}/api/session/update/${editSession._id}`,
         updatedSessionData,{
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -168,7 +169,7 @@ const SessionUI = () => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:5000/api/session/delete/${sessionToDelete._id}`,{
+        `${API_URL}/api/session/delete/${sessionToDelete._id}`,{
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

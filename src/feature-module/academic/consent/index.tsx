@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import * as bootstrap from "bootstrap";
 import toast, { Toaster } from "react-hot-toast";
-
+const API_URL = process.env.REACT_APP_URL;
 // Define interfaces for data structures
 interface User {
   userId: string;
@@ -107,13 +107,13 @@ const Consents: React.FC = () => {
         setLoading(true);
 
         // Fetch classes
-        const classResponse = await axios.get<Class[]>("http://localhost:5000/api/class", {
+        const classResponse = await axios.get<Class[]>(`${API_URL}/api/class`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setClasses(classResponse.data);
 
         // Fetch sessions
-        const sessionResponse = await axios.get<Session[]>("http://localhost:5000/api/session/get", {
+        const sessionResponse = await axios.get<Session[]>(`${API_URL}/api/session/get`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSessions(sessionResponse.data);
@@ -122,11 +122,11 @@ const Consents: React.FC = () => {
         let consentEndpoint = "";
         let params = {};
         if (currentUser.role === "parent") {
-          consentEndpoint = "http://localhost:5000/api/consent/my-consents";
+          consentEndpoint = `${API_URL}/api/consent/my-consents`;
         } else if (currentUser.role === "teacher") {
-          consentEndpoint = "http://localhost:5000/api/consent/teacher";
+          consentEndpoint = `${API_URL}/api/consent/teacher`;
         } else if (currentUser.role === "admin") {
-          consentEndpoint = "http://localhost:5000/api/consent/admin";
+          consentEndpoint = `${API_URL}/api/consent/admin`;
           if (selectedClass) {
             params = { classId: selectedClass };
           }
@@ -178,12 +178,12 @@ const Consents: React.FC = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/consent/create", consentData, {
+      const response = await axios.post(`${API_URL}/api/consent/create`, consentData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       // Refresh consents list
-      const consentEndpoint = currentUser.role === "teacher" ? "http://localhost:5000/api/consent/teacher" : "http://localhost:5000/api/consent/admin";
+      const consentEndpoint = currentUser.role === "teacher" ? `${API_URL}/api/consent/teacher` : `${API_URL}/api/consent/admin`;
       const params = currentUser.role === "admin" && selectedClass ? { classId: selectedClass } : {};
       const consentResponse = await axios.get<Consent[]>(consentEndpoint, {
         params,
@@ -217,12 +217,12 @@ const Consents: React.FC = () => {
     console.log("Sending consent response data:", responseData);
 
     try {
-      const response = await axios.put("http://localhost:5000/api/consent/respond", responseData, {
+      const response = await axios.put(`${API_URL}/api/consent/respond`, responseData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       // Refresh consents list
-      const consentResponse = await axios.get<ConsentResponse[]>("http://localhost:5000/api/consent/my-consents", {
+      const consentResponse = await axios.get<ConsentResponse[]>(`${API_URL}/api/consent/my-consents`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setConsentResponses(consentResponse.data);
@@ -256,7 +256,7 @@ const Consents: React.FC = () => {
   // Handle viewing consent responses
   const handleViewResponses = async (consent: Consent) => {
     try {
-      const response = await axios.get<ConsentResponse[]>(`http://localhost:5000/api/consent/responses/${consent._id}`, {
+      const response = await axios.get<ConsentResponse[]>(`${API_URL}/api/consent/responses/${consent._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

@@ -6,7 +6,7 @@ import StudentModals from '../studentModals';
 import StudentSidebar from './studentSidebar';
 import StudentBreadcrumb from './studentBreadcrumb';
 import axios from 'axios';
-
+const API_URL = process.env.REACT_APP_URL;
 // Updated Student interface to match API response
 interface Student {
   _id: string;
@@ -81,7 +81,7 @@ const StudentDetails = () => {
   const fetchStudentDetails = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:5000/api/student/${admissionNumber}`, {
+      const res = await axios.get(`${API_URL}/api/student/${admissionNumber}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setStudent(res.data); // API response matches the Student interface

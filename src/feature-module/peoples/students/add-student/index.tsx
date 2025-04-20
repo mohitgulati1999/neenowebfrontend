@@ -85,7 +85,7 @@ interface FormData {
     address: string;
   };
 }
-
+const API_URL = process.env.REACT_APP_URL;
 const AddStudent = () => {
   const { regNo } = useParams();
   const routes = all_routes;
@@ -135,7 +135,7 @@ const AddStudent = () => {
   useEffect(() => {
     // Fetch sessions
     axios
-      .get("http://localhost:5000/api/session/get", {
+      .get(`${API_URL}/api/session/get`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((res) => {
@@ -146,7 +146,7 @@ const AddStudent = () => {
 
     // Fetch classes
     axios
-      .get("http://localhost:5000/api/class", {
+      .get(`${API_URL}/api/class`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((res) => {
@@ -165,7 +165,7 @@ const AddStudent = () => {
     if (regNo) {
       setIsEdit(true);
       axios
-        .get(`http://localhost:5000/api/student/${regNo}`, {
+        .get(`${API_URL}/api/student/${regNo}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         })
         .then((res) => {
@@ -277,8 +277,8 @@ const AddStudent = () => {
     try {
       const token = localStorage.getItem("token");
       const url = isEdit
-        ? `http://localhost:5000/api/student/${regNo}`
-        : "http://localhost:5000/api/student/create";
+        ? `${API_URL}/api/student/${regNo}`
+        : `${API_URL}/api/student/create`;
       const method = isEdit ? "put" : "post";
   
       const response = await axios({

@@ -15,6 +15,7 @@ interface FormData {
   endTime: string | null;
   attachment: File | null;
 }
+const API_URL = process.env.REACT_APP_URL;
 
 interface SelectOption {
   value: string;
@@ -104,7 +105,7 @@ const AdminDashboardModal: React.FC = () => {
       console.log('Formatted data before sending:', formattedData);
   
       // Send data as JSON
-      const response = await axios.post('http://localhost:5000/api/events/add', formattedData, {
+      const response = await axios.post(`${API_URL}/api/events/add`, formattedData, {
         headers: { 'Content-Type': 'application/json' },
       });
   

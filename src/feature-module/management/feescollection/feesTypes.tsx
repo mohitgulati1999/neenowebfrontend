@@ -29,6 +29,7 @@ interface FeesGroup {
   createdAt: string;
   updatedAt: string;
 }
+const API_URL = process.env.REACT_APP_URL;
 
 const FeesTypes: React.FC = () => {
   const routes = all_routes;
@@ -44,17 +45,13 @@ const FeesTypes: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // const [typesResponse, groupsResponse] = await Promise.all([
-        //   axios.get<FeesType[]>("http://localhost:5000/api/feesType"),
-        //   axios.get<FeesGroup[]>("http://localhost:5000/api/feesGroup"),
-        // ]);
         const headers = {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         };
         
         const [typesResponse, groupsResponse] = await Promise.all([
-          axios.get<FeesType[]>("http://localhost:5000/api/feesType", { headers }),
-          axios.get<FeesGroup[]>("http://localhost:5000/api/feesGroup", { headers }),
+          axios.get<FeesType[]>(`${API_URL}/api/feesType`, { headers }),
+          axios.get<FeesGroup[]>(`${API_URL}/api/feesGroup`, { headers }),
         ]);        
         setFeesTypesData(typesResponse.data);
         // console.log(feesTypesData)

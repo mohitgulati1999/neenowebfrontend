@@ -6,6 +6,8 @@ import TooltipOption from "../../../core/common/tooltipOption";
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { Toaster, toast } from "react-hot-toast";
+
 
 interface Class {
   _id: string;
@@ -30,6 +32,7 @@ const ClassTimetable = () => {
   const [classes, setClasses] = useState<Class[]>([]);
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedWeekStart, setSelectedWeekStart] = useState<Date | null>(null);
+  const [userRole, setUserRole] = useState<string>("");
 
   // Modal-specific states
   const [modalClass, setModalClass] = useState<string>("");
@@ -40,21 +43,31 @@ const ClassTimetable = () => {
   const [thursdayContents, setThursdayContents] = useState<TimetableSlot[]>([{ subject: "", timeFrom: "", timeTo: "" }]);
   const [fridayContents, setFridayContents] = useState<TimetableSlot[]>([{ subject: "", timeFrom: "", timeTo: "" }]);
 
-  const apiBaseUrl = "http://localhost:5000/api";
+  const apiBaseUrl = process.env.REACT_APP_URL;
 
   // Get current week's start date (Monday)
   const getCurrentWeekStart = () => {
     const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 (Sunday) to 6 (Saturday)
-    const diff = today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1); // Adjust to Monday
+    const dayOfWeek = today.getDay();
+    const diff = today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
     return new Date(today.setDate(diff));
   };
 
-  // Fetch classes assigned to the teacher
+  // Decode token to get user role
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      setUserRole(decodedToken.role);
+    }
+  }, []);
+
+  // Fetch classes based on user role
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/class/teacher`, {
+        const endpoint = userRole === "admin" ? "api/class" : "api/class/teacher";
+        const response = await axios.get(`${apiBaseUrl}/${endpoint}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setClasses(response.data);
@@ -63,16 +76,16 @@ const ClassTimetable = () => {
         console.error("Error fetching classes:", error);
       }
     };
-    fetchClasses();
-  }, []);
+    if (userRole) fetchClasses();
+  }, [userRole]);
 
-  // Fetch timetable when class or week changes for main view
+  // Fetch timetable when class or week changes
   useEffect(() => {
     const fetchTimetable = async () => {
       if (!selectedClass || !selectedWeekStart) return;
       try {
         const weekStartString = selectedWeekStart.toISOString().split("T")[0];
-        const response = await axios.get(`${apiBaseUrl}/timetable/${selectedClass}/${weekStartString}`, {
+        const response = await axios.get(`${apiBaseUrl}/api/timetable/${selectedClass}/${weekStartString}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setTimetableData(response.data);
@@ -89,36 +102,33 @@ const ClassTimetable = () => {
     setSelectedWeekStart(getCurrentWeekStart());
   }, []);
 
-  // Fetch and pre-fill timetable data in modal when opened
+  // Fetch and pre-fill timetable data in modal
   const handleModalOpen = async () => {
-    // Initialize modal states with current selections if not already set
     if (!modalClass || !modalWeekStart) {
       setModalClass(selectedClass);
       setModalWeekStart(selectedWeekStart);
     }
 
-    // Reset to a single empty slot as a fallback
     setMondayContents([{ subject: "", timeFrom: "", timeTo: "" }]);
     setTuesdayContents([{ subject: "", timeFrom: "", timeTo: "" }]);
     setWednesdayContents([{ subject: "", timeFrom: "", timeTo: "" }]);
     setThursdayContents([{ subject: "", timeFrom: "", timeTo: "" }]);
     setFridayContents([{ subject: "", timeFrom: "", timeTo: "" }]);
 
-    // Fetch existing timetable data for the selected class and week
     if (modalClass && modalWeekStart) {
       try {
         const weekStartString = modalWeekStart.toISOString().split("T")[0];
-        const response = await axios.get(`${apiBaseUrl}/timetable/${modalClass}/${weekStartString}`, {
+        const response = await axios.get(`${apiBaseUrl}/api/timetable/${modalClass}/${weekStartString}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         const data = response.data;
         if (data && data.days) {
           const daysMap = {
-            "Monday": setMondayContents,
-            "Tuesday": setTuesdayContents,
-            "Wednesday": setWednesdayContents,
-            "Thursday": setThursdayContents,
-            "Friday": setFridayContents,
+            Monday: setMondayContents,
+            Tuesday: setTuesdayContents,
+            Wednesday: setWednesdayContents,
+            Thursday: setThursdayContents,
+            Friday: setFridayContents,
           };
 
           data.days.forEach((day: any) => {
@@ -129,12 +139,12 @@ const ClassTimetable = () => {
             }));
             const setter = daysMap[day.day as keyof typeof daysMap];
             if (setter && slots.length > 0) {
-              setter(slots); // Pre-fill with existing slots
+              setter(slots);
             }
           });
         }
       } catch (error) {
-        console.error("No existing timetable found for this week, starting with empty slots:", error);
+        console.error("No existing timetable found for this week:", error);
       }
     }
   };
@@ -159,48 +169,69 @@ const ClassTimetable = () => {
   const handleSubmitTimetable = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!modalClass || !modalWeekStart) {
-      alert("Please select a class and week start date.");
+      toast.error("Please select a class and week start date.");
       return;
     }
 
-    const weekStart = new Date(modalWeekStart);
     const token = localStorage.getItem("token");
     const decodedToken = token ? JSON.parse(atob(token.split(".")[1])) : null;
     const teacherId = decodedToken?.userId;
 
     if (!teacherId) {
-      alert("Unable to determine teacher ID. Please log in again.");
+      toast.error("Unable to determine user ID. Please log in again.");
       return;
     }
 
+    // Correct date calculation for the week
+    const weekStart = new Date(modalWeekStart);
     const timetablePayload = {
       classId: modalClass,
-      weekStartDate: modalWeekStart.toISOString().split("T")[0],
-      weekEndDate: new Date(weekStart.setDate(weekStart.getDate() + 4)).toISOString().split("T")[0],
+      weekStartDate: weekStart.toISOString().split("T")[0],
+      weekEndDate: new Date(weekStart.getTime() + 4 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
       days: [
-        { day: "Monday", date: modalWeekStart.toISOString().split("T")[0], slots: mondayContents.map(c => ({ startTime: c.timeFrom, endTime: c.timeTo, activity: c.subject, teacherId })) },
-        { day: "Tuesday", date: new Date(weekStart.setDate(weekStart.getDate() + 1)).toISOString().split("T")[0], slots: tuesdayContents.map(c => ({ startTime: c.timeFrom, endTime: c.timeTo, activity: c.subject, teacherId })) },
-        { day: "Wednesday", date: new Date(weekStart.setDate(weekStart.getDate() + 1)).toISOString().split("T")[0], slots: wednesdayContents.map(c => ({ startTime: c.timeFrom, endTime: c.timeTo, activity: c.subject, teacherId })) },
-        { day: "Thursday", date: new Date(weekStart.setDate(weekStart.getDate() + 1)).toISOString().split("T")[0], slots: thursdayContents.map(c => ({ startTime: c.timeFrom, endTime: c.timeTo, activity: c.subject, teacherId })) },
-        { day: "Friday", date: new Date(weekStart.setDate(weekStart.getDate() + 1)).toISOString().split("T")[0], slots: fridayContents.map(c => ({ startTime: c.timeFrom, endTime: c.timeTo, activity: c.subject, teacherId })) },
+        {
+          day: "Monday",
+          date: weekStart.toISOString().split("T")[0],
+          slots: mondayContents.map((c) => ({ startTime: c.timeFrom, endTime: c.timeTo, activity: c.subject, teacherId })),
+        },
+        {
+          day: "Tuesday",
+          date: new Date(weekStart.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+          slots: tuesdayContents.map((c) => ({ startTime: c.timeFrom, endTime: c.timeTo, activity: c.subject, teacherId })),
+        },
+        {
+          day: "Wednesday",
+          date: new Date(weekStart.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+          slots: wednesdayContents.map((c) => ({ startTime: c.timeFrom, endTime: c.timeTo, activity: c.subject, teacherId })),
+        },
+        {
+          day: "Thursday",
+          date: new Date(weekStart.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+          slots: thursdayContents.map((c) => ({ startTime: c.timeFrom, endTime: c.timeTo, activity: c.subject, teacherId })),
+        },
+        {
+          day: "Friday",
+          date: new Date(weekStart.getTime() + 4 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+          slots: fridayContents.map((c) => ({ startTime: c.timeFrom, endTime: c.timeTo, activity: c.subject, teacherId })),
+        },
       ],
     };
 
     try {
-      const response = await axios.post(`${apiBaseUrl}/timetable`, timetablePayload, {
+      const response = await axios.post(`${apiBaseUrl}/api/timetable`, timetablePayload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTimetableData(response.data);
-      console.log("Timetable saved:", response.data);
-      alert("Timetable successfully saved!");
+      toast.success("Timetable successfully saved!");
     } catch (error) {
       console.error("Error saving timetable:", error);
-      alert("Failed to save timetable. Please try again.");
+      toast.error("Failed to save timetable. Please try again.");
     }
   };
 
   return (
     <div>
+      <Toaster position="top-right" reverseOrder={false} />
       <div className="page-wrapper">
         <div className="content content-two">
           <div className="d-md-flex d-block align-items-center justify-content-between mb-3">
@@ -217,7 +248,13 @@ const ClassTimetable = () => {
             <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
               <TooltipOption />
               <div className="mb-2">
-                <Link to="#" className="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#add_time_table" onClick={handleModalOpen}>
+                <Link
+                  to="#"
+                  className="btn btn-primary d-flex align-items-center"
+                  data-bs-toggle="modal"
+                  data-bs-target="#add_time_table"
+                  onClick={handleModalOpen}
+                >
                   <i className="ti ti-square-rounded-plus me-2" /> Add Time Table
                 </Link>
               </div>
@@ -240,7 +277,7 @@ const ClassTimetable = () => {
                     className="form-control"
                     dateFormat="MMMM d, yyyy"
                     showWeekNumbers
-                    filterDate={(date) => date.getDay() === 1} // Restrict to Mondays
+                    filterDate={(date) => date.getDay() === 1}
                   />
                 </div>
                 <div className="mb-3 me-2">
@@ -261,29 +298,37 @@ const ClassTimetable = () => {
               </div>
             </div>
             <div className="card-body pb-0">
-              <div className="d-flex flex-nowrap overflow-auto">
-                {timetableData && timetableData.days.map((day: any, index: number) => (
-                  <div key={index} className="d-flex flex-column me-4 flex-fill">
-                    <div className="mb-3"><h6>{day.day}</h6></div>
-                    {day.slots.map((slot: any, slotIndex: number) => (
-                      <div key={slotIndex} className={`bg-transparent-${slotIndex % 7} rounded p-3 mb-4`}>
-                        <p className="d-flex align-items-center text-nowrap mb-1">
-                          <i className="ti ti-clock me-1" /> {slot.startTime} - {slot.endTime}
-                        </p>
-                        <p className="text-dark">Subject: {slot.activity}</p>
-                        <div className="bg-white rounded p-1 mt-3">
-                          <Link to={routes.teacherDetails} className="text-muted d-flex align-items-center">
-                            <span className="avatar avatar-sm me-2">
-                              <ImageWithBasePath src="assets/img/teachers/teacher-01.jpg" alt="Img" />
-                            </span>
-                            {slot.teacherId?.name || "You"}
-                          </Link>
-                        </div>
+              {timetableData && timetableData.days && timetableData.days.length > 0 ? (
+                <div className="d-flex flex-nowrap overflow-auto">
+                  {timetableData.days.map((day: any, index: number) => (
+                    <div key={index} className="d-flex flex-column me-4 flex-fill">
+                      <div className="mb-3">
+                        <h6>{day.day}</h6>
                       </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
+                      {day.slots.map((slot: any, slotIndex: number) => (
+                        <div key={slotIndex} className={`bg-transparent-${slotIndex % 7} rounded p-3 mb-4`}>
+                          <p className="d-flex align-items-center text-nowrap mb-1">
+                            <i className="ti ti-clock me-1" /> {slot.startTime} - {slot.endTime}
+                          </p>
+                          <p className="text-dark">Subject: {slot.activity}</p>
+                          <div className="bg-white rounded p-1 mt-3">
+                            <Link to={routes.teacherDetails} className="text-muted d-flex align-items-center">
+                              <span className="avatar avatar-sm me-2">
+                                <ImageWithBasePath src="assets/img/teachers/teacher-01.jpg" alt="Img" />
+                              </span>
+                              {slot.teacherId?.name || "You"}
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-muted">No Timetable found for this date</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -329,7 +374,7 @@ const ClassTimetable = () => {
                           const monday = new Date(date);
                           monday.setDate(date.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
                           setModalWeekStart(monday);
-                          handleModalOpen(); // Re-fetch data when week changes
+                          handleModalOpen();
                         }}
                         className="form-control"
                         dateFormat="MMMM d, yyyy"
@@ -635,8 +680,12 @@ const ClassTimetable = () => {
                 </div>
               </div>
               <div className="modal-footer">
-                <Link to="#" className="btn btn-light me-2" data-bs-dismiss="modal">Cancel</Link>
-                <button type="submit" className="btn btn-primary" data-bs-dismiss="modal">Add Time Table</button>
+                <Link to="#" className="btn btn-light me-2" data-bs-dismiss="modal">
+                  Cancel
+                </Link>
+                <button type="submit" className="btn btn-primary" data-bs-dismiss="modal">
+                  Add Time Table
+                </button>
               </div>
             </form>
           </div>

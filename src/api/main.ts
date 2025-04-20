@@ -1,5 +1,4 @@
 import { useAuth } from "../context/AuthContext";
-
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 // Define interfaces for API responses and data structures
@@ -110,7 +109,7 @@ interface EventResponse {
 
 // Create an Axios instance with default configuration
 const apiClient: AxiosInstance = axios.create({
-  baseURL: 'http://localhost:5000/api', // Adjust your API base URL
+  baseURL: `${process.env.REACT_APP_URL || 'http://localhost:5000'}/api`,
   headers: {
     'Content-Type': 'application/json',
   },

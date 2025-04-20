@@ -359,6 +359,7 @@ interface AttendanceRecord {
   inTime: string | null;
   outTime: string | null;
 }
+const API_URL = process.env.REACT_APP_URL;
 
 const StudentAttendance = () => {
   const routes = all_routes;
@@ -392,7 +393,7 @@ const StudentAttendance = () => {
 
   const fetchClasses = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/class`, {
+      const response = await axios.get(`${API_URL}/api/class`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const fetchedClasses = response.data;
@@ -408,7 +409,7 @@ const StudentAttendance = () => {
   const fetchClassStudents = async (classId: string, date: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/attendance/class/${classId}/${date}`,
+        `${API_URL}/api/attendance/class/${classId}/${date}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -459,7 +460,7 @@ const StudentAttendance = () => {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/attendance",
+        `${API_URL}/api/attendance`,
         {
           classId: selectedClassId,
           date: selectedDate,

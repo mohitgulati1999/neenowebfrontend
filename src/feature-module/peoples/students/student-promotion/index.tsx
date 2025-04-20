@@ -9,6 +9,7 @@ import { status, promotion, academicYear, allClass, allSection } from '../../../
 import PredefinedDateRanges from '../../../../core/common/datePicker';
 import TooltipOption from '../../../../core/common/tooltipOption';
 import axios from "axios";
+const API_URL = process.env.REACT_APP_URL;
 
 interface Student {
   _id: string;
@@ -27,7 +28,7 @@ const StudentPromotion = () => {
 
   const fetchStudents = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/student", {
+      const res = await axios.get(`${API_URL}/api/student`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       // Map API response to match expected table data structure

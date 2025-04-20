@@ -9,6 +9,7 @@ import TeacherSidebar from "./teacherSidebar";
 import TeacherBreadcrumb from "./teacherBreadcrumb";
 import TeacherModal from "../teacherModal";
 import { TableData } from "../../../../core/data/interface";
+const API_URL = process.env.REACT_APP_URL;
 
 const TeacherSalary = () => {
   const routes = all_routes;
@@ -21,7 +22,7 @@ const TeacherSalary = () => {
   useEffect(() => {
     const fetchTeacher = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/teacher/${id}`, {
+        const response = await axios.get(`${API_URL}/api/teacher/${id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setTeacher(response.data);

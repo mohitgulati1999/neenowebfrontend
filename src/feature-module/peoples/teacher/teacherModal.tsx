@@ -6,6 +6,7 @@ import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import CommonSelect from "../../../core/common/commonSelect";
 import axios from "axios";
+const API_URL = process.env.REACT_APP_URL;
 
 interface Teacher {
   id: string;
@@ -40,7 +41,7 @@ const TeacherModal: React.FC<TeacherModalProps> = ({ selectedTeacherId }) => {
           setLoading(true);
           console.log(selectedTeacherId)
           const response = await axios.get<Teacher>(
-            `http://localhost:5000/api/teacher/${selectedTeacherId}`,
+            `${API_URL}/api/teacher/${selectedTeacherId}`,
             {
               headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             }

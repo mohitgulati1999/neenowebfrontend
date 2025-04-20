@@ -34,6 +34,7 @@ interface LeaveStats {
   used: number;
   available: number;
 }
+const API_URL = process.env.REACT_APP_URL;
 
 const StudentLeaves: React.FC = () => {
   const routes = all_routes;
@@ -70,7 +71,7 @@ const StudentLeaves: React.FC = () => {
   const fetchStudentId = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/student/admission/${admissionNumber}`,
+        `${API_URL}/api/student/admission/${admissionNumber}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -83,7 +84,7 @@ const StudentLeaves: React.FC = () => {
 
   const fetchLeaves = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/leaves", {
+      const response = await axios.get(`${API_URL}/api/leaves`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const studentLeaves: Leave[] = response.data.filter(
@@ -123,7 +124,7 @@ const StudentLeaves: React.FC = () => {
         `Fetching attendance for studentId: ${studentId}, startDate: ${formattedStartDate}, endDate: ${formattedEndDate}`
       );
       const response = await axios.get(
-        `http://localhost:5000/api/attendance/student/${studentId}/period?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
+        `${API_URL}/api/attendance/student/${studentId}/period?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -147,7 +148,7 @@ const StudentLeaves: React.FC = () => {
   const handleUpdateLeaveStatus = async (leaveId: string, status: "approved" | "rejected") => {
     try {
       const response = await axios.put(
-        "http://localhost:5000/api/leaves/update",
+        `${API_URL}/api/leaves/update`,
         { leaveId, status },
         {
           headers: { Authorization: `Bearer ${token}` },

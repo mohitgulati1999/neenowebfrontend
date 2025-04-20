@@ -37,7 +37,7 @@ interface Message {
   attachment: string | null;
   createdAt: string;
 }
-
+const API_URL = process.env.REACT_APP_URL;
 const ReceiveMessages: React.FC = () => {
   const routes = all_routes;
   const userDropdownRef = useRef<HTMLDivElement | null>(null);
@@ -61,47 +61,52 @@ const ReceiveMessages: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const messagesRes = await axios.get(`http://localhost:5000/api/messages/inbox?userId=${user._id}`, {
+        const messagesRes = await axios.get(`${API_URL}/api/messages/inbox?userId=${user._id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
         setMessages(messagesRes.data);
         setFilteredMessages(messagesRes.data);
-
+  
         // Fetch filter options based on role
         if (user.role === 'teacher') {
-          const [classesRes, studentsRes] = await Promise.all([
-            axios.get(`http://localhost:5000/api/messages/classes/teacher/${user._id}`, {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            }),
-            axios.get('http://localhost:5000/api/messages/students', {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            }),
-          ]);
+          // First, fetch the teacher's classes
+          const classesRes = await axios.get(`${API_URL}/api/messages/classes/teacher/${user._id}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
           setAvailableClasses(classesRes.data);
+  
+          // Then, fetch students for those classes using POST
+          const classIds = classesRes.data.map((cls:any) => cls._id);
+          const studentsRes = await axios.post(
+            `${API_URL}/api/messages/students`,
+            { classIds }, // Send classIds in the body
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
           setAvailableStudents(studentsRes.data);
         } else if (user.role === 'parent') {
-          const adminsRes = await axios.get('http://localhost:5000/api/messages/users/admins', {
+          const adminsRes = await axios.get(`${API_URL}/api/messages/users/admins`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           });
           setAvailableUsers(adminsRes.data);
         } else if (user.role === 'student') {
-          // Fetch student data via API
-          const studentRes = await axios.get(`http://localhost:5000/api/messages/students/by-email?email=${user.email}`, {
+          const studentRes = await axios.get(`${API_URL}/api/messages/students/by-email?email=${user.email}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           });
           const student = studentRes.data;
           if (!student) throw new Error('Student not found');
-          const classesRes = await axios.get(`http://localhost:5000/api/messages/classes/${student.classId}`, {
+          const classesRes = await axios.get(`${API_URL}/api/messages/classes/${student.classId}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
@@ -109,10 +114,9 @@ const ReceiveMessages: React.FC = () => {
           setAvailableClasses([classesRes.data]);
           setAvailableStudents([student]);
         }
-        // Admin doesn’t need filters since they only see direct messages
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast.error('Failed to fetch data');
+      } catch (error:any) {
+        console.error('Error fetching data:', error.response?.data, error.response?.status);
+        toast.error(error.response?.data?.error || 'Failed to fetch data');
       }
     };
     fetchData();
@@ -124,7 +128,7 @@ const ReceiveMessages: React.FC = () => {
       setFilteredMessages(messages); // No filtering needed for admin
       return;
     }
-
+  
     let filtered = messages;
     if (selectedUsers.length > 0) {
       filtered = filtered.filter((msg) => msg.recipients.users.some((u) => selectedUsers.includes(u._id)));

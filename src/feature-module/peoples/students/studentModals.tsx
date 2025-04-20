@@ -7,6 +7,7 @@ import { feeGroup, feesTypes, leaveType, paymentType } from "../../../core/commo
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import axios from "axios";
+const API_URL = process.env.REACT_APP_URL;
 
 interface Student {
   name: string;
@@ -40,7 +41,7 @@ const StudentModals = () => {
   const fetchStudentData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:5000/api/student/${admissionNumber}`, {
+      const res = await axios.get(`${API_URL}/api/student/${admissionNumber}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setStudent(res.data);

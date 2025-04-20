@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { all_routes } from '../../router/all_routes';
-
+const API_URL = process.env.REACT_APP_URL;
 interface MessageFormData {
   recipients: {
     users: string[];
@@ -56,7 +56,7 @@ const SendMessage: React.FC = () => {
     const fetchInitialData = async () => {
       try {
         if (user.role === 'admin') {
-          const classesRes = await axios.get('http://localhost:5000/api/messages/classes', {
+          const classesRes = await axios.get(`${API_URL}/api/messages/classes`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
@@ -64,12 +64,12 @@ const SendMessage: React.FC = () => {
           setAvailableClasses(classesRes.data);
         } else if (user.role === 'teacher') {
           const [adminsRes, classesRes] = await Promise.all([
-            axios.get('http://localhost:5000/api/messages/users/admins', {
+            axios.get(`${API_URL}/api/messages/users/admins`, {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
               },
             }),
-            axios.get(`http://localhost:5000/api/messages/classes/teacher/${user._id}`, {
+            axios.get(`${API_URL}/api/messages/classes/teacher/${user._id}`, {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
               },
@@ -78,19 +78,19 @@ const SendMessage: React.FC = () => {
           setAvailableUsers(adminsRes.data);
           setAvailableClasses(classesRes.data);
         } else if (user.role === 'parent') {
-          const studentRes = await axios.get(`http://localhost:5000/api/messages/students/parent/${user._id}`, {
+          const studentRes = await axios.get(`${API_URL}/api/messages/students/parent/${user._id}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           });
           const classId = studentRes.data.classId;
           const [adminsRes, teachersRes] = await Promise.all([
-            axios.get('http://localhost:5000/api/messages/users/admins', {
+            axios.get(`${API_URL}/api/messages/users/admins`, {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
               },
             }),
-            axios.get(`http://localhost:5000/api/messages/classes/${classId}/teachers`, {
+            axios.get(`${API_URL}/api/messages/classes/${classId}/teachers`, {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
               },
@@ -117,7 +117,7 @@ const SendMessage: React.FC = () => {
           return;
         }
 
-        const response = await axios.post('http://localhost:5000/api/messages/students', {
+        const response = await axios.post(`${API_URL}/api/messages/students`, {
           classIds: formData.recipients.classes,
         }, {
           headers: {
@@ -209,7 +209,7 @@ const SendMessage: React.FC = () => {
         message: formData.message,
         attachment: formData.attachment ? formData.attachment.name : null,
       };
-      await axios.post('http://localhost:5000/api/messages/send', payload, {
+      await axios.post(`${API_URL}/api/messages/send`, payload, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

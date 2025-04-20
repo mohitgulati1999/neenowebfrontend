@@ -83,7 +83,7 @@ interface CommonSelectProps {
 
 const TeacherStudentLeaves: React.FC = () => {
   const routes = all_routes;
-  const apiBaseUrl = "http://localhost:5000/api";
+  const apiBaseUrl = process.env.REACT_APP_URL;
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [filteredLeaves, setFilteredLeaves] = useState<Leave[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("");
@@ -111,7 +111,7 @@ const TeacherStudentLeaves: React.FC = () => {
           return;
         }
 
-        const response = await axios.get(`${apiBaseUrl}/leaves/teacher`, {
+        const response = await axios.get(`${apiBaseUrl}/api/leaves/teacher`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -163,7 +163,7 @@ const TeacherStudentLeaves: React.FC = () => {
   const handleStatusUpdate = async (leaveId: string, status: "approved" | "rejected") => {
     try {
       const response = await axios.put(
-        `${apiBaseUrl}/leaves/update`,
+        `${apiBaseUrl}/api/leaves/update`,
         { leaveId, status },
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );

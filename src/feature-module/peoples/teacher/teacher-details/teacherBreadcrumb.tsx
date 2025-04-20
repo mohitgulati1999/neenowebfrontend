@@ -6,6 +6,7 @@ import ImageWithBasePath from '../../../../core/common/imageWithBasePath';
 interface TeacherBreadcrumbProps {
   id?: string;
 }
+const API_URL = process.env.REACT_APP_URL;
 
 const TeacherBreadcrumb: React.FC<TeacherBreadcrumbProps> = ({ id }) => {
   const routes = all_routes;
@@ -18,7 +19,7 @@ const TeacherBreadcrumb: React.FC<TeacherBreadcrumbProps> = ({ id }) => {
     if (!id) return; // Do nothing if no id is provided
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:5000/api/teacher/${id}`, {
+      const response = await axios.get(`${API_URL}/api/teacher/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setTeacher(response.data);

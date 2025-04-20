@@ -13,6 +13,7 @@ interface Option {
   value: string;
   label: string;
 }
+const API_URL = process.env.REACT_APP_URL;
 
 interface TeacherFormData {
   id: string;
@@ -81,7 +82,7 @@ const TeacherForm: React.FC = () => {
       const fetchTeacher = async () => {
         try {
           setLoading(true);
-          const response = await axios.get(`http://localhost:5000/api/teacher/${id}`, {
+          const response = await axios.get(`${API_URL}/api/teacher/${id}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           });
           const teacherData = response.data;
@@ -185,7 +186,7 @@ const TeacherForm: React.FC = () => {
 
       if (isEditMode) {
         const response = await axios.put(
-          `http://localhost:5000/api/teacher/${id}`,
+          `${API_URL}/api/teacher/${id}`,
           payload,
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
@@ -194,7 +195,7 @@ const TeacherForm: React.FC = () => {
         setSubmittedTeacherId(id);
       } else {
         const response = await axios.post(
-          "http://localhost:5000/api/teacher/create",
+          `${API_URL}/api/teacher/create`,
           payload,
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );

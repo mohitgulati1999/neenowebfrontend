@@ -3,6 +3,7 @@ import axios from "axios";
 import * as bootstrap from "bootstrap";
 import toast, { Toaster } from "react-hot-toast";
 
+const API_URL = process.env.REACT_APP_URL;
 // Define interfaces for data structures
 interface User {
   userId: string;
@@ -79,7 +80,7 @@ const ClassHomeWork: React.FC = () => {
       try {
         setLoading(true);
         // Fetch classes (for admin dropdown and teacher modal)
-        const classResponse = await axios.get<Class[]>("http://localhost:5000/api/class", {
+        const classResponse = await axios.get<Class[]>(`${API_URL}/api/class`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setClasses(classResponse.data);
@@ -87,7 +88,7 @@ const ClassHomeWork: React.FC = () => {
         // Fetch homework based on user role
         const params = currentUser.role === "admin" && selectedClass ? { classId: selectedClass } : {};
         console.log("Fetching homework with params:", params); // Debug log
-        const homeworkResponse = await axios.get<Homework[]>("http://localhost:5000/api/homework", {
+        const homeworkResponse = await axios.get<Homework[]>(`${API_URL}/api/homework`, {
           params,
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -121,12 +122,12 @@ const ClassHomeWork: React.FC = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/homework/add", homeworkData, {
+      const response = await axios.post(`${API_URL}/api/homework/add`, homeworkData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       // Refresh homework list
       const params = currentUser.role === "admin" && selectedClass ? { classId: selectedClass } : {};
-      const homeworkResponse = await axios.get<Homework[]>("http://localhost:5000/api/homework", {
+      const homeworkResponse = await axios.get<Homework[]>(`${API_URL}/api/homework`, {
         params,
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -165,12 +166,12 @@ const ClassHomeWork: React.FC = () => {
     }
 
     try {
-      await axios.put(`http://localhost:5000/api/homework/${selectedHomework._id}`, homeworkData, {
+      await axios.put(`${API_URL}/api/homework/${selectedHomework._id}`, homeworkData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       // Refresh homework list
       const params = currentUser.role === "admin" && selectedClass ? { classId: selectedClass } : {};
-      const homeworkResponse = await axios.get<Homework[]>("http://localhost:5000/api/homework", {
+      const homeworkResponse = await axios.get<Homework[]>(`${API_URL}/api/homework`, {
         params,
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -192,12 +193,12 @@ const ClassHomeWork: React.FC = () => {
   const handleDeleteHomework = async () => {
     if (!selectedHomework) return;
     try {
-      await axios.delete(`http://localhost:5000/api/homework/${selectedHomework._id}`, {
+      await axios.delete(`${API_URL}/api/homework/${selectedHomework._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       // Refresh homework list
       const params = currentUser.role === "admin" && selectedClass ? { classId: selectedClass } : {};
-      const homeworkResponse = await axios.get<Homework[]>("http://localhost:5000/api/homework", {
+      const homeworkResponse = await axios.get<Homework[]>(`${API_URL}/api/homework`, {
         params,
         headers: { Authorization: `Bearer ${token}` },
       });

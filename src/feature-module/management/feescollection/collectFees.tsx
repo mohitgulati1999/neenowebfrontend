@@ -42,6 +42,7 @@ interface FeeComponent {
   status: string;
   selected?: boolean;
 }
+const API_URL = process.env.REACT_APP_URL;
 
 const CollectFees = () => {
   const routes = all_routes;
@@ -69,7 +70,7 @@ const CollectFees = () => {
 
   const fetchSessions = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/session/get", {
+      const response = await axios.get(`${API_URL}/api/session/get`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const sessionOptions = response.data.map((session: any) => ({
@@ -88,7 +89,7 @@ const CollectFees = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/feesPayment/fee-payments/${sessionId}`,
+        `${API_URL}/api/feesPayment/fee-payments/${sessionId}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -121,7 +122,7 @@ const CollectFees = () => {
   const fetchFeeComponents = async (studentId: string, sessionId: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/feesTemplate/student-fees/${studentId}/${sessionId}`,
+        `${API_URL}/api/feesTemplate/student-fees/${studentId}/${sessionId}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -206,7 +207,7 @@ const CollectFees = () => {
       const reminderPromises = selectedComponents.map(async (component) => {
         const amountDue = component.amountDue - component.amountPaid;
         const response = await axios.post(
-          "http://localhost:5000/api/feesPayment/send-reminder",
+          `${API_URL}/api/feesPayment/send-reminder`,
           {
             studentId: selectedStudent.studentId,
             sessionId: selectedSession,

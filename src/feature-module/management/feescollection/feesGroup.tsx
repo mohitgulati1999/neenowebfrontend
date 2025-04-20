@@ -9,6 +9,7 @@ import FeesModal from "./feesModal";
 import TooltipOption from "../../../core/common/tooltipOption";
 import axios from "axios";
 import toast from "react-hot-toast";
+const API_URL = process.env.REACT_APP_URL;
 
 interface FeesGroup {
   _id: string;
@@ -45,11 +46,11 @@ const FeesGroup: React.FC = () => {
     const fetchData = async () => {
       try {
         const [groupsResponse, typesResponse] = await Promise.all([
-          axios.get<FeesGroup[]>("http://localhost:5000/api/feesGroup", {
+          axios.get<FeesGroup[]>(`${API_URL}/api/feesGroup`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             }}),
-          axios.get<FeesType[]>("http://localhost:5000/api/feesType", {
+          axios.get<FeesType[]>(`${API_URL}/api/feesType`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             }}),

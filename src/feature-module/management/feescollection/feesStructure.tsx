@@ -24,6 +24,7 @@ interface Class {
   updatedAt?: string;
   __v?: number;
 }
+const API_URL = process.env.REACT_APP_URL;
 
 interface FeesGroup {
   _id: string;
@@ -86,14 +87,10 @@ const FeeTemplateManager: React.FC = () => {
       };
       try {
         const [sessionsResponse, groupsResponse, typesResponse, templatesResponse] = await Promise.all([
-          // axios.get<Session[]>("http://localhost:5000/api/session/get").catch(() => ({ data: [] })),
-          // axios.get<FeesGroup[]>("http://localhost:5000/api/feesGroup").catch(() => ({ data: [] })),
-          // axios.get<FeesType[]>("http://localhost:5000/api/feesType").catch(() => ({ data: [] })),
-          // axios.get<FeeTemplate[]>("http://localhost:5000/api/feesTemplate").catch(() => ({ data: [] })),
-          axios.get<Session[]>("http://localhost:5000/api/session/get", config).catch(() => ({ data: [] })),
-          axios.get<FeesGroup[]>("http://localhost:5000/api/feesGroup", config).catch(() => ({ data: [] })),
-          axios.get<FeesType[]>("http://localhost:5000/api/feesType", config).catch(() => ({ data: [] })),
-          axios.get<FeeTemplate[]>("http://localhost:5000/api/feesTemplate", config).catch(() => ({ data: [] })), 
+          axios.get<Session[]>(`${API_URL}/api/session/get`, config).catch(() => ({ data: [] })),
+          axios.get<FeesGroup[]>(`${API_URL}/api/feesGroup`, config).catch(() => ({ data: [] })),
+          axios.get<FeesType[]>(`${API_URL}/api/feesType`, config).catch(() => ({ data: [] })),
+          axios.get<FeeTemplate[]>(`${API_URL}/api/feesTemplate`, config).catch(() => ({ data: [] })), 
         ]);
 
         // Add fallbacks for null or incomplete data
@@ -151,9 +148,8 @@ const FeeTemplateManager: React.FC = () => {
 
   const fetchClassesForSession = async (sessionId: string) => {
     try {
-      // const response = await axios.get<Class[]>(`http://localhost:5000/api/class/session/${sessionId}`).catch(() => ({ data: [] }));
       const response = await axios
-  .get<Class[]>(`http://localhost:5000/api/class/session/${sessionId}`, {
+  .get<Class[]>(`${API_URL}/api/class/session/${sessionId}`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -496,7 +492,7 @@ const AddFeeTemplateModal: React.FC<AddFeeTemplateModalProps> = ({
         ...templateForm,
         sessionId,
       };
-      const response = await axios.post<FeeTemplate>("http://localhost:5000/api/feesTemplate", payload);
+      const response = await axios.post<FeeTemplate>(`${API_URL}/api/feesTemplate`, payload);
       setTemplates((prev) => [...prev, response.data]);
       setSelectedTemplate(response.data);
       toast.success("Fee Template created successfully");
@@ -811,7 +807,7 @@ const EditFeeTemplateModal: React.FC<EditFeeTemplateModalProps> = ({
         ...templateForm,
         sessionId,
       };
-      const response = await axios.put<FeeTemplate>(`http://localhost:5000/api/feesTemplate/${selectedTemplateId}`, payload);
+      const response = await axios.put<FeeTemplate>(`${API_URL}/api/feesTemplate/${selectedTemplateId}`, payload);
       setTemplates((prev) => prev.map((t) => (t._id === selectedTemplateId ? response.data : t)));
       setSelectedTemplate(response.data);
       toast.success("Fee Template updated successfully");
@@ -828,7 +824,7 @@ const EditFeeTemplateModal: React.FC<EditFeeTemplateModalProps> = ({
       return;
     }
     try {
-      await axios.delete(`http://localhost:5000/api/feesTemplate/${selectedTemplateId}`);
+      await axios.delete(`${API_URL}/api/feesTemplate/${selectedTemplateId}`);
       setTemplates((prev) => prev.filter((t) => t._id !== selectedTemplateId));
       setSelectedTemplate(null);
       setSelectedTemplateId("");
@@ -1079,7 +1075,7 @@ const AssignTemplateModal: React.FC<AssignTemplateModalProps> = ({
     try {
       const updatedTemplate = { ...selectedTemplate, classIds: selectedClassIds };
       const response = await axios.put<FeeTemplate>(
-        `http://localhost:5000/api/feesTemplate/${selectedTemplate._id}`,
+        `${API_URL}/api/feesTemplate/${selectedTemplate._id}`,
         updatedTemplate
       );
       setTemplates((prev) =>

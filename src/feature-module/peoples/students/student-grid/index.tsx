@@ -8,6 +8,7 @@ import StudentModals from '../studentModals';
 import CommonSelect from '../../../../core/common/commonSelect';
 import TooltipOption from '../../../../core/common/tooltipOption';
 import axios from 'axios';
+const API_URL = process.env.REACT_APP_URL;
 
 interface Student {
   _id: string;
@@ -40,7 +41,7 @@ const StudentGrid = () => {
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/student', {
+      const res = await axios.get(`${API_URL}/api/student`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setStudents(res.data);
@@ -55,7 +56,7 @@ const StudentGrid = () => {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/class', {
+      const res = await axios.get(`${API_URL}/api/class`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setClasses(res.data.map((c: any) => ({ value: c._id, label: c.name })));

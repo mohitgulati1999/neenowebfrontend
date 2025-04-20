@@ -14,7 +14,7 @@ import { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import * as bootstrap from "bootstrap"; // Import Bootstrap JS
 import toast from "react-hot-toast"; // Import react-hot-toast
-
+const API_URL = process.env.REACT_APP_URL;
 // Define types for the notice data
 interface Notice {
   _id: string;
@@ -69,7 +69,7 @@ const NoticeBoard: React.FC = () => {
   const fetchNoticesByRole = async () => {
     try {
       const response = await axios.get<Notice[]>(
-        `http://localhost:5000/api/notices/role/${userRole}`, {
+        `${API_URL}/api/notices/role/${userRole}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       }
       );
@@ -118,7 +118,7 @@ const NoticeBoard: React.FC = () => {
         message: formData.message,
         messageTo: formData.messageTo,
       };
-      await axios.post("http://localhost:5000/api/notices", payload, {
+      await axios.post(`${API_URL}/api/notices`, payload, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -173,7 +173,7 @@ const NoticeBoard: React.FC = () => {
         messageTo: formData.messageTo,
       };
       await axios.put(
-        `http://localhost:5000/api/notices/${selectedNoticeId}`,
+        `${API_URL}/api/notices/${selectedNoticeId}`,
         payload, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -205,7 +205,7 @@ const NoticeBoard: React.FC = () => {
   // Handle delete notice
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:5000/api/notices/${id}`, {
+      await axios.delete(`${API_URL}/api/notices/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

@@ -6,6 +6,8 @@ import ImageWithBasePath from "../../../../core/common/imageWithBasePath";
 import TeacherModal from "../teacherModal";
 import TeacherSidebar from "./teacherSidebar";
 import TeacherBreadcrumb from "./teacherBreadcrumb";
+const API_URL = process.env.REACT_APP_URL;
+
 const TeacherLibrary = () => {
   const routes = all_routes;
   const { id } = useParams<{ id: string }>();
@@ -16,7 +18,7 @@ const TeacherLibrary = () => {
   useEffect(() => {
     const fetchTeacher = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/teacher/${id}`, {
+        const response = await axios.get(`${API_URL}/api/teacher/${id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setTeacher(response.data);

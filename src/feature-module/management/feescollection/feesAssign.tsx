@@ -6,6 +6,7 @@ import Table from "../../../core/common/dataTable/index";
 import AssignModal from "./assignModal";
 import axios from "axios";
 import { toast } from "react-toastify";
+const API_URL = process.env.REACT_APP_URL;
 
 interface Option {
   value: string;
@@ -70,7 +71,7 @@ const FeesAssign: React.FC = () => {
 
   const fetchSessions = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/session/get", {
+      const response = await axios.get(`${API_URL}/api/session/get`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setSessions(
@@ -89,7 +90,7 @@ const FeesAssign: React.FC = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/feesTemplate/getTemplateInfoByClass/${selectedSession}`,
+        `${API_URL}/api/feesTemplate/getTemplateInfoByClass/${selectedSession}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }

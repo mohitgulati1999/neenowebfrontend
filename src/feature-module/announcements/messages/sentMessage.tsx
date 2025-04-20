@@ -37,7 +37,7 @@ interface Message {
   attachment: string | null;
   createdAt: string;
 }
-
+const API_URL = process.env.REACT_APP_URL;
 const SentMessages: React.FC = () => {
   const routes = all_routes;
   const actionDropdownRef = useRef<HTMLDivElement | null>(null);
@@ -52,7 +52,7 @@ const SentMessages: React.FC = () => {
 
   const fetchMessages = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/messages/sent?userId=${user._id}`, {
+      const response = await axios.get(`${API_URL}/api/messages/sent?userId=${user._id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -83,7 +83,7 @@ const SentMessages: React.FC = () => {
       return;
     }
     try {
-      await axios.delete('http://localhost:5000/api/messages/delete', {
+      await axios.delete(`${API_URL}/api/messages/delete`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

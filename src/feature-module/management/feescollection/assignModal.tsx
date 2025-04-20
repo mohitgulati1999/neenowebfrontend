@@ -44,6 +44,7 @@ interface ClassData {
     fees: FeeGroup[];
   }[];
 }
+const API_URL = process.env.REACT_APP_URL;
 
 interface AssignModalProps {
   classData: ClassData;
@@ -83,7 +84,7 @@ const AssignModal: React.FC<AssignModalProps> = ({
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/student/by-class-session/${classData._id}/${sessionId}`,
+        `${API_URL}/api/student/by-class-session/${classData._id}/${sessionId}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -104,7 +105,7 @@ const AssignModal: React.FC<AssignModalProps> = ({
         return;
       }
       const response = await axios.get(
-        `http://localhost:5000/api/feesTemplate/get-assigned-students/${classData.templates[0]._id}/${sessionId}`,
+        `${API_URL}/api/feesTemplate/get-assigned-students/${classData.templates[0]._id}/${sessionId}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -115,7 +116,7 @@ const AssignModal: React.FC<AssignModalProps> = ({
       const studentFeeData = await Promise.all(
         assignedStudents.map(async (student: Student) => {
           const feeResponse = await axios.get(
-            `http://localhost:5000/api/feesTemplate/student-fees/${student._id}/${sessionId}`,
+            `${API_URL}/api/feesTemplate/student-fees/${student._id}/${sessionId}`,
             {
               headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             }
@@ -347,7 +348,7 @@ const AssignModal: React.FC<AssignModalProps> = ({
       await Promise.all(
         customFeesForStudents.map(({ studentId, customFees }) =>
           axios.post(
-            "http://localhost:5000/api/feesTemplate/assign-fees-to-students",
+            `${API_URL}/api/feesTemplate/assign-fees-to-students`,
             {
               templateId: classData.templates[0]._id,
               sessionId,

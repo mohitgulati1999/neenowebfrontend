@@ -14,6 +14,7 @@ import ImageWithBasePath from "../../../../core/common/imageWithBasePath";
 import TooltipOption from "../../../../core/common/tooltipOption";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast"; 
+const API_URL = process.env.REACT_APP_URL;
 
 interface Teacher {
   _id: string; // MongoDB ID
@@ -63,7 +64,7 @@ const TeacherList = () => {
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
-        const response = await axios.get<Teacher[]>("http://localhost:5000/api/teacher", {
+        const response = await axios.get<Teacher[]>(`${API_URL}/api/teacher`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setTeachers(response.data);
@@ -82,7 +83,7 @@ const TeacherList = () => {
     if (!teacherToDelete) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/teacher/${teacherToDelete}`, {
+      await axios.delete(`${API_URL}/api/teacher/${teacherToDelete}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       // Remove the deleted teacher from the state using _id

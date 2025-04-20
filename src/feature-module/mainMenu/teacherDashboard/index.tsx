@@ -11,7 +11,21 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import dayjs from "dayjs";
 import { DatePicker } from "antd";
+import { jwtDecode } from "jwt-decode";
 
+interface MyTokenPayload {
+  email: string;
+  
+}
+
+const token = localStorage.getItem("token");
+
+if (token) {
+  const decoded = jwtDecode<MyTokenPayload>(token);
+  console.log(decoded);
+}
+const user = JSON.parse(localStorage.getItem("user") ?? JSON.stringify({ role: "student" }));
+console.log(user)
 const TeacherDashboard = () => {
   const routes = all_routes;
   const [date, setDate] = useState<Nullable<Date>>(null);
@@ -252,7 +266,7 @@ const TeacherDashboard = () => {
             <div className="col-md-12 d-flex">
               <div className="card flex-fill bg-info bg-03">
                 <div className="card-body">
-                  <h1 className="text-white mb-1"> Good Morning Ms.Teena</h1>
+                  <h1 className="text-white mb-1"> Good Morning {user.name}</h1>
                   <p className="text-white mb-3">Have a Good day at work</p>
                 </div>
               </div>
@@ -263,9 +277,9 @@ const TeacherDashboard = () => {
           <div className="row">
             <div className="col-xxl-8 col-xl-12">
               <div className="row">
-                <div className="col-xxl-7 col-xl-8 d-flex">
-                  <div className="card bg-dark position-relative flex-fill">
-                    <div className="card-body pb-1">
+                {/* <div className="col-xxl-7 col-xl-8 d-flex"> */}
+                  {/* <div className="card bg-dark position-relative flex-fill"> */}
+                    {/* <div className="card-body pb-1">
                       <div className="d-sm-flex align-items-center justify-content-between row-gap-3">
                         <div className="d-flex align-items-center overflow-hidden mb-3">
                           <div className="avatar avatar-xxl rounded flex-shrink-0 border border-2 border-white me-3">
@@ -317,7 +331,7 @@ const TeacherDashboard = () => {
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> */}
                 <div className="col-xxl-5 col-xl-4 d-flex">
                   <div className="card flex-fill">
                     <div className="card-body">

@@ -14,6 +14,7 @@ interface Student {
   _id: string;
   classId: string;
 }
+const API_URL = process.env.REACT_APP_URL;
 
 interface TimetableSlot {
   startTime: string; // e.g., "09:00"
@@ -84,7 +85,7 @@ const StudentTimeTable: React.FC = () => {
     try {
       console.log("fetchStudent: Sending request");
       const response = await axios.get(
-        `http://localhost:5000/api/student/admission/${admissionNumber}`,
+        `${API_URL}/api/student/admission/${admissionNumber}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -111,7 +112,7 @@ const StudentTimeTable: React.FC = () => {
         `fetchTimetable: Fetching for classId: ${student!.classId}, weekStartDate: ${formattedWeekStartDate}`
       );
       const response = await axios.get(
-        `http://localhost:5000/api/timetable/${student!.classId}/${formattedWeekStartDate}`,
+        `${API_URL}/api/timetable/${student!.classId}/${formattedWeekStartDate}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

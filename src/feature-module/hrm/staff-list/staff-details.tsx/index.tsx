@@ -3,6 +3,7 @@ import ImageWithBasePath from "../../../../core/common/imageWithBasePath";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { all_routes } from "../../../router/all_routes";
+const API_URL = process.env.REACT_APP_URL;
 
 const StaffDetails = () => {
   const routes = all_routes;
@@ -15,7 +16,7 @@ const StaffDetails = () => {
   useEffect(() => {
     const fetchTeacher = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/teacher/${id}`, {
+        const response = await axios.get(`${API_URL}/api/teacher/${id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setTeacher(response.data);

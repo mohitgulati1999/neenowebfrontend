@@ -69,6 +69,7 @@ interface Student {
   role: 'student';
   __v: number;
 }
+const API_URL = process.env.REACT_APP_URL;
 
 interface Event {
   eventFor: string;
@@ -145,7 +146,7 @@ const AdminDashboard = () => {
     const fetchNotices = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('http://localhost:5000/api/notices', {
+        const response = await axios.get(`${API_URL}/api/notices`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           }});
@@ -496,7 +497,7 @@ const AdminDashboard = () => {
     const fetchEvents = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/events/get",
+          `${API_URL}/api/events/get`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

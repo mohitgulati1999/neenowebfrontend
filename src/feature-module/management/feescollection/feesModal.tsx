@@ -28,6 +28,7 @@ interface FeesType {
   createdAt: string;
   updatedAt: string;
 }
+const API_URL = process.env.REACT_APP_URL;
 
 interface FeesModalProps {
   feesGroups: FeesGroup[];
@@ -111,7 +112,7 @@ const FeesModal: React.FC<FeesModalProps> = ({
   const handleAddFeesGroup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await axios.post<FeesGroup>("http://localhost:5000/api/feesGroup", formData, {
+      const response = await axios.post<FeesGroup>(`${API_URL}/api/feesGroup`, formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         }});
@@ -130,7 +131,7 @@ const FeesModal: React.FC<FeesModalProps> = ({
     e.preventDefault();
     try {
       const response = await axios.put<FeesGroup>(
-        `http://localhost:5000/api/feesGroup/${id}`,
+        `${API_URL}/api/feesGroup/${id}`,
         editFormData[id] || {},
         {
           headers: {
@@ -149,7 +150,7 @@ const FeesModal: React.FC<FeesModalProps> = ({
 
   const handleDeleteFeesGroup = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:5000/api/feesGroup/${id}`, {
+      await axios.delete(`${API_URL}/api/feesGroup/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -198,7 +199,7 @@ const handleEditTypeInputChange = (
     e.preventDefault();
     console.log("Sending Fees Type:", typeFormData);
     try {
-      const response = await axios.post<FeesType>("http://localhost:5000/api/feesType", typeFormData, {
+      const response = await axios.post<FeesType>(`${API_URL}/api/feesType`, typeFormData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -227,7 +228,7 @@ const handleEditTypeInputChange = (
       };
       console.log("Edit Payload:", payload); // Debug payload
   
-      const response = await axios.put<FeesType>(`http://localhost:5000/api/feesType/${id}`, payload, {
+      const response = await axios.put<FeesType>(`${API_URL}/api/feesType/${id}`, payload, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -244,7 +245,7 @@ const handleEditTypeInputChange = (
 
   const handleDeleteFeesType = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:5000/api/feesType/${id}`, {
+      await axios.delete(`${API_URL}/api/feesType/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

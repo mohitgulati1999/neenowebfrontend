@@ -1,7 +1,6 @@
 import axios from 'axios';
-
-// Define the base URL for your API
-const API_BASE_URL = 'http://localhost:5000/api';
+// Define the base URL from environment variable
+const API_BASE_URL = `${process.env.REACT_APP_URL}/api`;
 
 // Define the register request payload type
 interface RegisterRequest {
@@ -31,12 +30,12 @@ export const loginUser = async (email: string, password: string) => {
   }
 };
 
-// Forgot password
-export const forgotPassword = async (email: string) => {
-  try {
-    const response = await axios.post(`${API_BASE_URL}/forgot-password`, { email });
-    return response.data;
-  } catch (error: any) {
-    throw new Error(error.response?.data?.message || 'Password reset failed');
-  }
-};
+// // Forgot password
+// export const forgotPassword = async (email: string) => {
+//   try {
+//     const response = await axios.post(`${API_BASE_URL}/forgot-password`, { email });
+//     return response.data;
+//   } catch (error: any) {
+//     throw new Error(error.response?.data?.message || 'Password reset failed');
+//   }
+// };

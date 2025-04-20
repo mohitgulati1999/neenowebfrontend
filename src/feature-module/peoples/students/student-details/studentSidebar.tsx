@@ -32,6 +32,7 @@ interface Student {
     pickupPoint?: string;
   };
 }
+const API_URL = process.env.REACT_APP_URL;
 
 interface StudentSidebarProps {
   admissionNumber: string; // Updated prop name to match API field
@@ -53,9 +54,8 @@ const StudentSidebar = ({ admissionNumber }: StudentSidebarProps) => {
 
   const fetchStudentById = async () => {
     try {
-      // const response = await axios.get(`http://localhost:5000/api/student/${admissionNumber}`); // Updated URL to use admissionNumber
       const response = await axios.get(
-        `http://localhost:5000/api/student/${admissionNumber}`,
+        `${API_URL}/api/student/${admissionNumber}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
