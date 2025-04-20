@@ -288,12 +288,12 @@ const CollectFees = () => {
       sorter: (a: ExtendedTableData, b: ExtendedTableData) => a.class.length - b.class.length,
     },
     {
-      title: "Amount Due ($)",
+      title: "Amount Due (₹)",
       dataIndex: "amount",
       sorter: (a: ExtendedTableData, b: ExtendedTableData) => a.amount.length - b.amount.length,
     },
     {
-      title: "Amount Paid ($)",
+      title: "Amount Paid (₹)",
       dataIndex: "paid",
       sorter: (a: ExtendedTableData, b: ExtendedTableData) =>
         (a.paid || "").length - (b.paid || "").length,

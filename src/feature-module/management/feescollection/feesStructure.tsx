@@ -77,14 +77,13 @@ const FeeTemplateManager: React.FC = () => {
   const [showEditTemplateModal, setShowEditTemplateModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-
+  const config = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   useEffect(() => {
     const fetchInitialData = async () => {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      };
       try {
         const [sessionsResponse, groupsResponse, typesResponse, templatesResponse] = await Promise.all([
           axios.get<Session[]>(`${API_URL}/api/session/get`, config).catch(() => ({ data: [] })),
@@ -492,7 +491,15 @@ const AddFeeTemplateModal: React.FC<AddFeeTemplateModalProps> = ({
         ...templateForm,
         sessionId,
       };
-      const response = await axios.post<FeeTemplate>(`${API_URL}/api/feesTemplate`, payload);
+      const response = await axios.post<FeeTemplate>(
+        `${API_URL}/api/feesTemplate`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );      
       setTemplates((prev) => [...prev, response.data]);
       setSelectedTemplate(response.data);
       toast.success("Fee Template created successfully");
@@ -807,7 +814,16 @@ const EditFeeTemplateModal: React.FC<EditFeeTemplateModalProps> = ({
         ...templateForm,
         sessionId,
       };
-      const response = await axios.put<FeeTemplate>(`${API_URL}/api/feesTemplate/${selectedTemplateId}`, payload);
+      const response = await axios.put<FeeTemplate>(
+        `${API_URL}/api/feesTemplate/${selectedTemplateId}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+      
       setTemplates((prev) => prev.map((t) => (t._id === selectedTemplateId ? response.data : t)));
       setSelectedTemplate(response.data);
       toast.success("Fee Template updated successfully");
@@ -824,7 +840,12 @@ const EditFeeTemplateModal: React.FC<EditFeeTemplateModalProps> = ({
       return;
     }
     try {
-      await axios.delete(`${API_URL}/api/feesTemplate/${selectedTemplateId}`);
+      await axios.delete(`${API_URL}/api/feesTemplate/${selectedTemplateId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
       setTemplates((prev) => prev.filter((t) => t._id !== selectedTemplateId));
       setSelectedTemplate(null);
       setSelectedTemplateId("");
@@ -1076,8 +1097,14 @@ const AssignTemplateModal: React.FC<AssignTemplateModalProps> = ({
       const updatedTemplate = { ...selectedTemplate, classIds: selectedClassIds };
       const response = await axios.put<FeeTemplate>(
         `${API_URL}/api/feesTemplate/${selectedTemplate._id}`,
-        updatedTemplate
+        updatedTemplate,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
       );
+      
       setTemplates((prev) =>
         prev.map((t) => (t._id === selectedTemplate._id ? response.data : t))
       );
